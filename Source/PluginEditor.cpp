@@ -34,11 +34,11 @@ YawnGeneratorAudioProcessorEditor::YawnGeneratorAudioProcessorEditor (YawnGenera
 	yawnAirSliderAttachment = new AudioProcessorValueTreeState::SliderAttachment(processor.parameters, "yawnAir", yawnAirSlider);
 	addAndMakeVisible(&yawnAirSlider);
 
-	//yawn = ImageFileFormat::loadFrom(File::File("C:\\Users\\matth\\JUCE\\YawnGenerator\\Assets\\yawn.jpg"));
-	//if (yawn.isValid()) {
-	//	imageComponent.setImage(yawn);
-	//	addAndMakeVisible(&imageComponent);
-	//}
+	yawn = ImageFileFormat::loadFrom(File::File("C:\\Users\\matth\\JUCE\\YawnGenerator\\Assets\\yawn.jpg"));
+	if (yawn.isValid()) {
+		imageComponent.setImage(yawn);
+		addAndMakeVisible(&imageComponent);
+	}
 
 }
 
