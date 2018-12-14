@@ -74,6 +74,7 @@ public:
 	void updateCutoff();
 	void updateFilter(double cutoff);
 	double filter(double input);
+	void pan(double input, float* left, float* right, int sample);
 
 	double tableSizeOverSampleRate;
 	AudioSampleBuffer wavetablesA[8];

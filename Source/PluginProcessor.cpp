@@ -258,8 +258,9 @@ void YawnGeneratorAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
 			//sprintf(msgbuf, "My variable is %f\n", tempR[sample]);
 			//OutputDebugString(msgbuf);
 		//}
-		left[sample] = tempR[sample]*gain*0.8;
-		right[sample] = left[sample];
+		pan(tempR[sample] * gain*0.8, left, right, sample);
+		//left[sample] = tempR[sample]*gain*0.8;
+		//right[sample] = left[sample];
 	}
 }
 
@@ -305,9 +306,6 @@ double YawnGeneratorAudioProcessor::getNextSample()
 			double start = midiToFrequency(inputFreq - 2);
 			double stop  = midiToFrequency(inputFreq);
 			double dist = stop - start;
-			//char msgbuf[2048];
-			//sprintf(msgbuf, "My variable is %f %f %f %f\n", dist, start, tableDeltas[0], ramp(t, 0, 0.25, false)*dist + start);
-			//OutputDebugString(msgbuf);
 			tableDeltas[0] = (dist * ramp(t, 0, 0.25, false) + start) * tableSizeOverSampleRate;
 		}
 		else if (t < 0.5) {
@@ -353,21 +351,12 @@ double YawnGeneratorAudioProcessor::getNextSample()
 			double stop  = midiToFrequency(inputFreq - 17);
 			double dist = stop - start;
 			tableDeltas[6] = (dist * expRamp(t, 1.5, 1.75, false) + start) * tableSizeOverSampleRate;
-			//char msgbuf[2048];
-			//sprintf(msgbuf, "My variable is %f\n", pow(2.0, 11/12));
-			//OutputDebugString(msgbuf);
 		}
 		else if (t < 2) {
 			output = linearInterpolateTableValues(7)*expRamp(t, 1.75, 2.0, false);
-			//char msgbuf[2048];
-			//sprintf(msgbuf, "My variable is %d\n", 3);
-			//OutputDebugString(msgbuf);
 		}
 		double noise = getNoise(t);
 		output += noise;
-		//else if (t < 2.25) {
-		//	output = r.nextDouble() - 0.5;
-		//}
 		t += (tDelta*speed);
 	}
 	else {
@@ -386,6 +375,16 @@ double YawnGeneratorAudioProcessor::getNextSample()
 	return output;
 }
 
+void YawnGeneratorAudioProcessor::pan(double input, float* left, float* right, int sample) {
+	double leftFunction = exp(-t);
+	double rightFunction = log10(3 * t) + 0.2;
+	if (t >= 2) {
+		leftFunction == 0;
+		rightFunction = 1;
+	}
+	left[sample] = leftFunction * input;
+	right[sample] = rightFunction * input;
+}
 
 double YawnGeneratorAudioProcessor::getNoise(double time) 
 {
@@ -406,7 +405,6 @@ void YawnGeneratorAudioProcessor::updateCutoff()
 void YawnGeneratorAudioProcessor::setFrequency(int frequencyInMidi) 
 {
 
-
 	tableSizeOverSampleRate = TABLE_SIZE / theSampleRate;
 
 	tableDeltas[0] = midiToFrequency(frequencyInMidi) * tableSizeOverSampleRate;
@@ -419,9 +417,6 @@ void YawnGeneratorAudioProcessor::setFrequency(int frequencyInMidi)
 	tableDeltas[7] = midiToFrequency(frequencyInMidi - 24) * tableSizeOverSampleRate;
 
 	inputFreq = frequencyInMidi;
-	//char msgbuf[2048];
-	//sprintf(msgbuf, "My variable is %f\n", pow(2.0, 11/12));
-	//OutputDebugString(msgbuf);
 
 }
 double YawnGeneratorAudioProcessor::midiToFrequency(int m) 
@@ -476,9 +471,6 @@ double YawnGeneratorAudioProcessor::logRamp(double param, double start, double s
 		newMax = 0.001;
 		newMin = 1.0;
 	}
-	//double b = log(newMax / newMin) / (stop - start);
-	//double a = newMax / pow(MathConstants<double>::euler, stop* b);
-	//double y = log((MathConstants<double>::euler, b*param))/log(a);
 	double y = (exp(param) - 1) / (MathConstants<double>::euler - 1);
 
 	return y;
@@ -503,17 +495,10 @@ double YawnGeneratorAudioProcessor::linearInterpolateTableValues(int tableNumber
 
 void YawnGeneratorAudioProcessor::createWavetables()
 {
-	//char msgbuf[2048];
-	//sprintf(msgbuf, "My variable is CALLEd\n");
-	//OutputDebugString(msgbuf);
-
 	int harmonics[] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14 };
 
 	for (int i = 0; i < numElementsInArray(wavetablesA); i++)
 	{
-		//char msgbuf[2048];
-		//sprintf(msgbuf, "My variable is %f\n", i);
-		//OutputDebugString(msgbuf);
 		if (i == 7) {
 			bool x = true;
 		}
@@ -521,8 +506,6 @@ void YawnGeneratorAudioProcessor::createWavetables()
 		wavetablesA[i].clear();
 
 		auto* samples = wavetablesA[i].getWritePointer(0);
-
-		//float harmonicWeights[] = { 0.75f, 0.1f, 0.05f, 0.333f, 0.12, 0.09f, 0.1, 0.005, 0.002f, 0.001f };
 
 		for (int harmonic = 0; harmonic < numElementsInArray(harmonics); ++harmonic)
 		{
@@ -547,30 +530,10 @@ void YawnGeneratorAudioProcessor::createWavetables()
 
 	}
 
-	//if (tableNumber == 7) {
-		//auto *table = wavetablesA[7].getReadPointer(0);
-		//for (int i = 0; i < TABLE_SIZE; i++) {
-			//char msgbuf[2048];
-			//sprintf(msgbuf, "My variable is %f\n", table[i]);
-			//OutputDebugString(msgbuf);
-		//}
-	//}
-
-
 }
 
 void YawnGeneratorAudioProcessor::updateFilter(double cutoff) {
-	//double omegaC = (MathConstants<double>::twoPi * 20.0) / theSampleRate;
-	//double Q = 1.0 / 10000.0;
-	//double beta = 0.5*((1 - tan(omegaC / (2 * Q))) / (1 + tan(omegaC / (2 * Q))));
-	//double gamma = (0.5 + beta)*cos(omegaC);
-	////double gamma = cos(omegaC) / (1 + dsp::FastMathApproximations::sin(omegaC));
-	//a0 = 0.5 - beta;
-	//a1 = 0.0;
-	//a2 = -(0.5 - beta);
-	//b1 = -2 * gamma;
-	//b2 = 2 * beta;
-	//From Pirckle
+	//From Pirckle LPF
 	double omegaC = (MathConstants<double>::twoPi * cutoff) / theSampleRate;
 	double gamma = dsp::FastMathApproximations::cos(omegaC) / (1 + dsp::FastMathApproximations::sin(omegaC));
 	a0 = (1 - gamma) / 2;
