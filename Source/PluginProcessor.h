@@ -13,27 +13,6 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "./OscillatorParams.h"
 
-// tom's spectral additions
-#if _WINDOWS
-#define FFT_USED_FFTW 0
-#define FFT_USED_APPLEVECLIB 0
-#define FFT_USED_INTEL 1
-#include <malloc.h>
-#else
-#define FFT_USED_FFTW 0
-#define FFT_USED_APPLEVECLIB 1
-#define FFT_USED_INTEL 0
-#endif
-#if FFT_USED_FFTW
-#include <rfftw.h>
-#elif FFT_USED_APPLEVECLIB
-#define VIMAGE_H
-#include <Accelerate/Accelerate.h>
-#elif FFT_USED_INTEL
-#include <ipps.h>
-#include <ippcore.h>
-#endif
-
 
 
 const int TABLE_SIZE = 2048;
@@ -131,76 +110,7 @@ public:
 	AudioSampleBuffer temp;
 
 
-	// tom's spectral additions
-	enum
-	{
-		kSizeFFT = 1024,
-		kHalfSizeFFT = 512,
-		kMaxSizeFFT = 16384,
-		kHalfMaxSizeFFT = 8192
-	};
-	enum
-	{
-		kMonoMode,
-		kStereoMode,
-		kMono2StereoMode
-	};
-	enum
-	{
-		kHamming,
-		kVonHann,
-		kBlackman,
-		kKaiser
-	};
-	// spectral methods
-	void initspect(int32_t numInputs);
-	void termspect();
 
-	bool allocateMemory();
-	void clearMemory();   // clears memory
-	void freeMemory();
-	void setFFTSize(int32_t newSize);
-	virtual void updateFFT(void);
-	virtual void processActual(AudioSampleBuffer& buffer);
-	virtual void processFFTBlock();
-	virtual void processSpect();
-	void cartToPolar(float *spectrum, float *polarSpectrum);
-	void polarToCart(float *polarSpectrum, float *spectrum);
-	void scaleWindows(void);
-	void initHammingWindows(void);
-	void initVonHannWindows(void);
-	void initBlackmanWindows(void);
-	void initKaiserWindows(void);
-	float kaiserIno(float x);
-
-	// spectral variables
-	int32_t numInputs, numOutputs;
-	int32_t windowSelected;
-	int32_t inputTimeL, outputTimeL;
-	int32_t inputTimeR, outputTimeR;
-	int32_t bufferPosition;
-	int32_t channelMode;
-	int32_t blockSizeFFT, overLapFFT, halfSizeFFT, sizeFFT, log2n;
-	float oneOverBlockSize;
-	float pi, twoPi;
-
-	// spectral buffers
-	float *inShiftL, *inShiftR, *outShiftL, *outShiftR;
-	float *inSpectraL, *inSpectraR, *outSpectraL, *outSpectraR;
-	float *inBufferL, *inBufferR, *outBufferL, *outBufferR;
-	float *inFFTL, *inFFTR;
-	float *analysisWindow, *synthesisWindow;
-#if FFT_USED_FFTW
-	rfftw_plan planIn, planOut;
-#elif FFT_USED_APPLEVECLIB
-	FFTSetup setupReal;
-	COMPLEX_SPLIT split;
-#elif FFT_USED_INTEL
-	IppsFFTSpec_R_32f* fftSpec[11];
-	Ipp8u* mFFTSpecBuf[11];
-	Ipp8u* mFFTWorkBuf[11];
-	Ipp8u *mFFTInitBuf;
-#endif
 private:
 
     //==============================================================================
