@@ -12,10 +12,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "./OscillatorParams.h"
-#include "./Voices.h"
 const int TABLE_SIZE = 2048;
 const int START_FREQ = 57;
-const int NUM_VOICES = 8;
 //==============================================================================
 /**
 */
@@ -73,7 +71,6 @@ public:
 	void updateCutoff();
 	void updateFilter(double cutoff);
 	double filter(double input);
-	double sumVoices(double input);
 
 	double tableSizeOverSampleRate;
 	AudioSampleBuffer wavetablesA[8];
@@ -92,8 +89,6 @@ public:
 	double tDelta;
 	double speed;
 	double theSampleRate;
-	HashMap<int, Voice*> voices;
-	int currentVoice;
 
 	double currentIndices[8];
 	double currentPhases[8];

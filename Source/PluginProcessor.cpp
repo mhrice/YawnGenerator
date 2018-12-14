@@ -51,7 +51,6 @@ YawnGeneratorAudioProcessor::YawnGeneratorAudioProcessor()
 	in1 = in2 = out1 = out2 = 0.0;
 	gain = 0;
 	speed = 1;
-	currentVoice = 0;
 	noise = 0;
 }
 
@@ -189,9 +188,7 @@ void YawnGeneratorAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
 			setFrequency(m.getNoteNumber());
 			gain = m.getFloatVelocity();
 			trigger = true;
-			currentVoice = m.getNoteNumber();
 
-			voices.set(currentVoice, new Voice());
 			t = 0;
 
 
@@ -233,7 +230,6 @@ void YawnGeneratorAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
 
 		double filteredSample = filter(getNextSample());
 		double envelopedSample = envelope(filteredSample);
-		double summedVoices = sumVoices(envelopedSample);
 		left[sample] = envelopedSample*gain*0.8;
 		right[sample] = left[sample];
 		//if (phase >= TABLE_SIZE) phase = 0.0;
@@ -366,23 +362,6 @@ double YawnGeneratorAudioProcessor::getNextSample()
 	return output;
 }
 
-double YawnGeneratorAudioProcessor::sumVoices(double input)
-{
-	double output = 0;
-	Array<double> a;
-	for (HashMap<int, Voice*>::Iterator i(voices); i.next();) {
-		a.add(i.getValue()->value);
-	}
-	double xNorm;
-	for (int i = 0; i < a.size(); i++) {
-		xNorm += a[i] * a[i];
-	}
-	xNorm = sqrt(xNorm);
-	for (int i = 0; i < a.size(); i++) {
-		output += a[i] /xNorm;
-	}
-	return output;
-}
 
 double YawnGeneratorAudioProcessor::getNoise(double time) 
 {
