@@ -10,7 +10,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include <windows.h>
 //==============================================================================
 YawnGeneratorAudioProcessor::YawnGeneratorAudioProcessor()
 	:parameters(*this, nullptr),
@@ -229,7 +228,7 @@ void YawnGeneratorAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
 		auto* right = buffer.getWritePointer(1);
 		auto* tempW = temp.getWritePointer(0);
 
-
+		// Modulates LPF cutoff 
 		updateCutoff();
 		updateFilter(cutoff);
 
@@ -238,26 +237,12 @@ void YawnGeneratorAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
 
 		double filteredSample = filter(getNextSample());
 		double envelopedSample = envelope(filteredSample);
-		//temp[sample] = envelopedSample;
-		//temp.add(envelopedSample);
 		tempW[sample] = envelopedSample;
-		//temp.add(envelopedSample);
-		//left[sample] = envelopedSample*gain*0.8;
-		//right[sample] = left[sample];
-		//if (phase >= TABLE_SIZE) phase = 0.0;
-
-
-		//}
     }
 
 	reverb.processMono(temp.getWritePointer(0), buffer.getNumSamples());
 	auto* tempR = temp.getReadPointer(0);
 	for (auto sample = 0; sample < buffer.getNumSamples(); sample++) {
-		//if (sample % 10 == 0) {
-			//char msgbuf[2048];
-			//sprintf(msgbuf, "My variable is %f\n", tempR[sample]);
-			//OutputDebugString(msgbuf);
-		//}
 		pan(tempR[sample] * gain*0.8, left, right, sample);
 		//left[sample] = tempR[sample]*gain*0.8;
 		//right[sample] = left[sample];
@@ -517,11 +502,7 @@ void YawnGeneratorAudioProcessor::createWavetables()
 				samples[j] += (double)sample * weights[i][harmonic];
 
 				currentAngle += angleDelta;
-				if (i == 7 && samples[j]==INFINITY) {
-					char msgbuf[2048];
-					sprintf(msgbuf, "My variable is %d %d %f %f\n", numElementsInArray(harmonics), harmonic, weights[i][harmonic], weights[i][14]);
-					OutputDebugString(msgbuf);
-				}
+
 			}
 
 		}
