@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="ZWaZN6" name="YawnGenerator" projectType="audioplug" jucerVersion="5.4.1"
-              pluginCharacteristicsValue="pluginWantsMidiIn" pluginFormats="buildStandalone,buildVST">
+              pluginCharacteristicsValue="pluginWantsMidiIn" pluginFormats="buildStandalone,buildVST,buildVST3">
   <MAINGROUP id="LZaxFV" name="YawnGenerator">
     <GROUP id="{33964D19-34F3-54C6-1A4D-DEBB30E68549}" name="Source">
       <FILE id="miMOhd" name="OscillatorParams.h" compile="0" resource="0"
